@@ -14,6 +14,8 @@ log()  { echo "[smooth-brain] $*"; }
 ok()   { echo "[smooth-brain] ✓ $*"; }
 warn() { echo "[smooth-brain] ! $*"; }
 
+command -v python3 >/dev/null 2>&1 || { warn "python3 is required but not found. Please install it."; exit 1; }
+
 add_hook() {
   local settings="$1"
   python3 - "$settings" <<'PYEOF'
@@ -26,6 +28,7 @@ try:
 except (FileNotFoundError, json.JSONDecodeError):
     data = {}
 
+# $HOME is intentionally a literal string — it expands at hook execution time, not install time
 hook_entry = {
     "matcher": "",
     "hooks": [
@@ -48,9 +51,17 @@ for h in submit_hooks:
 
 submit_hooks.append(hook_entry)
 
-with open(path, "w") as f:
-    json.dump(data, f, indent=2)
-    f.write("\n")
+import os, tempfile
+dir_ = os.path.dirname(os.path.abspath(path))
+fd, tmp = tempfile.mkstemp(dir=dir_)
+try:
+    with os.fdopen(fd, "w") as f:
+        json.dump(data, f, indent=2)
+        f.write("\n")
+    os.replace(tmp, path)
+except:
+    os.unlink(tmp)
+    raise
 
 print("[smooth-brain] ✓ hook added to " + path)
 PYEOF
@@ -81,9 +92,17 @@ if not filtered:
 if not hooks:
     del data["hooks"]
 
-with open(path, "w") as f:
-    json.dump(data, f, indent=2)
-    f.write("\n")
+import os, tempfile
+dir_ = os.path.dirname(os.path.abspath(path))
+fd, tmp = tempfile.mkstemp(dir=dir_)
+try:
+    with os.fdopen(fd, "w") as f:
+        json.dump(data, f, indent=2)
+        f.write("\n")
+    os.replace(tmp, path)
+except:
+    os.unlink(tmp)
+    raise
 
 print("[smooth-brain] ✓ hook removed from " + path)
 PYEOF
@@ -103,7 +122,11 @@ install_claude() {
     return
   fi
 
-  mkdir -p "$CLAUDE_COMMANDS_DIR"
+  if [[ "$UNINSTALL" != true ]]; then
+    for f in "$CMD_SRC" "$SKILL_SRC"; do
+      [[ -f "$f" ]] || { warn "Missing required file: $f"; exit 1; }
+    done
+  fi
 
   if [[ "$UNINSTALL" == true ]]; then
     rm -f "$CLAUDE_COMMANDS_DIR/smooth-brain.md"
@@ -112,6 +135,8 @@ install_claude() {
     ok "Claude Code uninstalled"
     return
   fi
+
+  mkdir -p "$CLAUDE_COMMANDS_DIR"
 
   cp "$CMD_SRC" "$CLAUDE_COMMANDS_DIR/smooth-brain.md"
   ok "Slash command → $CLAUDE_COMMANDS_DIR/smooth-brain.md"
@@ -122,7 +147,6 @@ install_claude() {
   ok "Default preset (bumpy) → $CLAUDE_ACTIVE"
 
   add_hook "$CLAUDE_SETTINGS"
-  ok "Session-start hook configured in $CLAUDE_SETTINGS"
 }
 
 # ── main ───────────────────────────────────────────────────────────────────────
