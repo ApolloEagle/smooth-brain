@@ -45,15 +45,20 @@ function Add-SmoothBrainHook($path) {
         matcher = ""
         hooks = @([PSCustomObject]@{
             type = "command"
-            command = 'cat "$HOME/.claude/smooth-brain-active" 2>/dev/null || true'
+            command = 'if (Test-Path "$env:USERPROFILE\.claude\smooth-brain-active") { Get-Content "$env:USERPROFILE\.claude\smooth-brain-active" }'
         })
     }
 
     $data.hooks.UserPromptSubmit = @($data.hooks.UserPromptSubmit) + $hookEntry
 
     $tmp = $path + ".tmp"
-    $data | ConvertTo-Json -Depth 10 | Set-Content $tmp -Encoding UTF8
-    Move-Item $tmp $path -Force
+    try {
+        $data | ConvertTo-Json -Depth 10 | Set-Content $tmp -Encoding UTF8
+        Move-Item $tmp $path -Force
+    } catch {
+        if (Test-Path $tmp) { Remove-Item $tmp -Force }
+        throw
+    }
     Ok "hook added to $path"
 }
 
@@ -73,9 +78,21 @@ function Remove-SmoothBrainHook($path) {
     })
     $data.hooks.UserPromptSubmit = $filtered
 
+    if ($filtered.Count -eq 0) {
+        $data.hooks.PSObject.Properties.Remove('UserPromptSubmit')
+    }
+    if ($data.hooks.PSObject.Properties.Count -eq 0) {
+        $data.PSObject.Properties.Remove('hooks')
+    }
+
     $tmp = $path + ".tmp"
-    $data | ConvertTo-Json -Depth 10 | Set-Content $tmp -Encoding UTF8
-    Move-Item $tmp $path -Force
+    try {
+        $data | ConvertTo-Json -Depth 10 | Set-Content $tmp -Encoding UTF8
+        Move-Item $tmp $path -Force
+    } catch {
+        if (Test-Path $tmp) { Remove-Item $tmp -Force }
+        throw
+    }
     Ok "hook removed from $path"
 }
 
@@ -100,8 +117,8 @@ if (-not (Test-Path $ClaudeDir)) {
     Copy-Item $CmdSrc (Join-Path $CommandsDir "smooth-brain.md") -Force
     Ok "Slash command -> $CommandsDir\smooth-brain.md"
 
-    $skillContent = Get-Content $SkillSrc -Raw
-    "$skillContent`n`nActive preset: bumpy" | Set-Content $ActiveFile -Encoding UTF8
+    $skillContent = (Get-Content $SkillSrc -Raw) -replace "`r`n", "`n"
+    ($skillContent.TrimEnd() + "`n`nActive preset: bumpy`n") | Set-Content $ActiveFile -Encoding UTF8 -NoNewline
     Ok "Default preset (bumpy) -> $ActiveFile"
 
     Add-SmoothBrainHook $SettingsFile
