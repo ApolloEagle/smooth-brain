@@ -86,11 +86,11 @@ Legacy installer command:
 
 | Preset | What changes |
 |--------|-------------|
-| `wrinkled` | No jargon, no filler openers ("Certainly!", "Great question!"), shorter responses |
-| `bumpy` | + Short sentences, common words, bullets over paragraphs, no unsolicited context |
-| `smooth` | + Explain like never coded before, single steps only, one sentence where possible |
+| `wrinkled` | Plain English, no filler openers, full multi-step checklist at once |
+| `bumpy` | + Short sentences, common words, grouped phases for multi-step tasks |
+| `smooth` | + Beginner-friendly language, one user action at a time, waits for confirmation |
 
-All presets automatically suspend for destructive operation warnings (deleting files, dropping databases, etc.) and resume after.
+All presets automatically suspend for destructive operation warnings (deleting files, dropping databases, etc.) and resume after. If the user asks for all steps, a checklist, a quick reference, or a summary, smooth-brain gives the full list.
 
 ## How it works
 
