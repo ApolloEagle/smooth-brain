@@ -107,33 +107,6 @@ hooks/hooks.json
 
 The legacy installer still copies the same command into `~/.claude/commands` for users who are not using plugins yet.
 
-## Validate before submitting
-
-```bash
-node scripts/test-plugin-layout.mjs
-node scripts/test-installers.mjs
-claude plugin validate
-```
-
-Submit for community review at:
-
-- https://claude.ai/settings/plugins/submit
-- https://platform.claude.com/plugins/submit
-
-## Release automation
-
-Pushes to `main` run installer tests and create or update a `release/next` PR when releasable changes are detected. The planner uses conventional commits first:
-
-| Commit type | Bump |
-|-------------|------|
-| `feat:` | minor |
-| `fix:`, `perf:`, `refactor:`, `docs:` | patch |
-| `BREAKING CHANGE:` or `type!:` | major |
-
-If `OPENAI_API_KEY` and `OPENAI_MODEL` are set, the planner asks OpenAI for a structured release plan and README/changelog wording. Without both values, the deterministic plan is used.
-
-After the release PR is merged, the release workflow reads `VERSION`, extracts the matching `CHANGELOG.md` entry, creates the `vX.Y.Z` tag, and publishes a GitHub Release.
-
 ## Platforms
 
 - Claude Code
