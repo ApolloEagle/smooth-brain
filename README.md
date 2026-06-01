@@ -43,7 +43,7 @@ All presets automatically suspend for destructive operation warnings (deleting f
 
 ## How it works
 
-A single `SKILL.md` file tells the AI how to behave. The installer copies it to the right location for each tool and wires up a session-start hook so it activates automatically.
+The `/smooth-brain` slash command carries the full preset rules and writes the active preset to `~/.claude/smooth-brain-active`. A session-start hook reads that file so the chosen preset stays active across prompts.
 
 ## Platforms
 
