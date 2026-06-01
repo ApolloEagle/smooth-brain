@@ -8,10 +8,10 @@ A plugin that tells AI agents to respond with fewer words and simpler language. 
 
 ```bash
 # macOS / Linux
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/smooth-brain/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ApolloEagle/smooth-brain/main/install.sh | bash
 
 # Windows PowerShell
-irm https://raw.githubusercontent.com/YOUR_USERNAME/smooth-brain/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/ApolloEagle/smooth-brain/main/install.ps1 | iex
 ```
 
 Re-run to update. Safe to run multiple times.
@@ -19,7 +19,7 @@ Re-run to update. Safe to run multiple times.
 ## Uninstall
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/smooth-brain/main/install.sh | bash -s -- --uninstall
+curl -fsSL https://raw.githubusercontent.com/ApolloEagle/smooth-brain/main/install.sh | bash -s -- --uninstall
 ```
 
 ## Usage (Claude Code)
