@@ -4,9 +4,9 @@ Reduces AI response verbosity and complexity. Three presets:
 
 | Preset | Effect |
 |--------|--------|
-| `wrinkled` | Plain English, no jargon, no filler openers |
-| `bumpy` | Short sentences, common words, bullets over prose *(default)* |
-| `smooth` | Explain-like-I'm-5, one sentence answers, analogies only |
+| `wrinkled` | Plain English, no filler openers, full multi-step checklist at once |
+| `bumpy` | Short sentences, common words, grouped phases *(default)* |
+| `smooth` | Beginner-friendly language, one user action at a time |
 
 ## Usage
 
