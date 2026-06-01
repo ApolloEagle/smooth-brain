@@ -17,7 +17,7 @@ $CommandsDir = Join-Path $ClaudeDir "commands"
 $SettingsFile = Join-Path $ClaudeDir "settings.json"
 $ActiveFile = Join-Path $ClaudeDir "smooth-brain-active"
 $SkillSrc = if ($RepoRoot) { Join-Path $RepoRoot "skills\smooth-brain\SKILL.md" } else { "" }
-$CmdSrc = if ($RepoRoot) { Join-Path $RepoRoot ".claude\commands\smooth-brain.md" } else { "" }
+$CmdSrc = if ($RepoRoot) { Join-Path $RepoRoot "commands\smooth-brain.md" } else { "" }
 
 function Log($msg)  { Write-Host "[smooth-brain] $msg" }
 function Ok($msg)   { Write-Host "[smooth-brain] v $msg" }
@@ -143,7 +143,7 @@ if (-not (Test-Path $ClaudeDir)) {
     Ok "Claude Code uninstalled"
 } else {
     New-Item -ItemType Directory -Force $CommandsDir | Out-Null
-    Copy-PluginFile $CmdSrc ".claude/commands/smooth-brain.md" (Join-Path $CommandsDir "smooth-brain.md")
+    Copy-PluginFile $CmdSrc "commands/smooth-brain.md" (Join-Path $CommandsDir "smooth-brain.md")
     Ok "Slash command -> $CommandsDir\smooth-brain.md"
 
     $skillContent = (Get-PluginContent $SkillSrc "skills/smooth-brain/SKILL.md") -replace "`r`n", "`n"

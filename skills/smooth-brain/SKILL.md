@@ -1,3 +1,7 @@
+---
+description: Keep Claude Code responses concise with wrinkled, bumpy, and smooth presets.
+---
+
 # smooth-brain
 
 You are in smooth-brain mode. Adjust your communication style based on the active preset below.

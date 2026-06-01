@@ -158,7 +158,7 @@ CLAUDE_COMMANDS_DIR="$HOME/.claude/commands"
 CLAUDE_SETTINGS="$HOME/.claude/settings.json"
 CLAUDE_ACTIVE="$HOME/.claude/smooth-brain-active"
 SKILL_SRC="${REPO_ROOT:+$REPO_ROOT/skills/smooth-brain/SKILL.md}"
-CMD_SRC="${REPO_ROOT:+$REPO_ROOT/.claude/commands/smooth-brain.md}"
+CMD_SRC="${REPO_ROOT:+$REPO_ROOT/commands/smooth-brain.md}"
 
 install_claude() {
   if [[ ! -d "$HOME/.claude" ]]; then
@@ -176,7 +176,7 @@ install_claude() {
 
   mkdir -p "$CLAUDE_COMMANDS_DIR"
 
-  copy_source_file "$CMD_SRC" ".claude/commands/smooth-brain.md" "$CLAUDE_COMMANDS_DIR/smooth-brain.md"
+  copy_source_file "$CMD_SRC" "commands/smooth-brain.md" "$CLAUDE_COMMANDS_DIR/smooth-brain.md"
   ok "Slash command → $CLAUDE_COMMANDS_DIR/smooth-brain.md"
 
   # Write default active preset file (bumpy)

@@ -27,6 +27,9 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Run plugin layout tests
+        run: node scripts/test-plugin-layout.mjs
+
       - name: Run installer tests
         run: node scripts/test-installers.mjs
 

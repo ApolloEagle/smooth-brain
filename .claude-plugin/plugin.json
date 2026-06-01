@@ -1,0 +1,21 @@
+{
+  "name": "smooth-brain",
+  "version": "0.3.0",
+  "description": "Switch Claude Code between concise response styles with wrinkled, bumpy, and smooth presets.",
+  "author": {
+    "name": "Blake Reimer",
+    "url": "https://github.com/ApolloEagle"
+  },
+  "homepage": "https://github.com/ApolloEagle/smooth-brain",
+  "repository": "https://github.com/ApolloEagle/smooth-brain",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "prompt-engineering",
+    "verbosity",
+    "productivity"
+  ],
+  "commands": "./commands/",
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json"
+}
