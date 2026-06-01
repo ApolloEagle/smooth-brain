@@ -4,22 +4,48 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$RepoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+$ScriptPath = $MyInvocation.MyCommand.Path
+$RepoRoot = if ([string]::IsNullOrWhiteSpace($ScriptPath)) { "" } else { Split-Path -Parent $ScriptPath }
+$SmoothBrainRef = if ($env:SMOOTH_BRAIN_REF) { $env:SMOOTH_BRAIN_REF } else { "main" }
+$RawBase = if ($env:SMOOTH_BRAIN_RAW_BASE) {
+    $env:SMOOTH_BRAIN_RAW_BASE.TrimEnd("/")
+} else {
+    "https://raw.githubusercontent.com/ApolloEagle/smooth-brain/$SmoothBrainRef"
+}
 $ClaudeDir = Join-Path $env:USERPROFILE ".claude"
 $CommandsDir = Join-Path $ClaudeDir "commands"
 $SettingsFile = Join-Path $ClaudeDir "settings.json"
 $ActiveFile = Join-Path $ClaudeDir "smooth-brain-active"
-$SkillSrc = Join-Path $RepoRoot "skills\smooth-brain\SKILL.md"
-$CmdSrc = Join-Path $RepoRoot ".claude\commands\smooth-brain.md"
+$SkillSrc = if ($RepoRoot) { Join-Path $RepoRoot "skills\smooth-brain\SKILL.md" } else { "" }
+$CmdSrc = if ($RepoRoot) { Join-Path $RepoRoot ".claude\commands\smooth-brain.md" } else { "" }
 
 function Log($msg)  { Write-Host "[smooth-brain] $msg" }
 function Ok($msg)   { Write-Host "[smooth-brain] v $msg" }
 function Warn($msg) { Write-Host "[smooth-brain] ! $msg" }
 
+function Copy-PluginFile($localPath, $rawPath, $destination) {
+    if ($localPath -and (Test-Path $localPath)) {
+        Copy-Item $localPath $destination -Force
+        return
+    }
+
+    Invoke-WebRequest -Uri "$RawBase/$rawPath" -OutFile $destination
+}
+
+function Get-PluginContent($localPath, $rawPath) {
+    if ($localPath -and (Test-Path $localPath)) {
+        return Get-Content $localPath -Raw
+    }
+
+    return Invoke-RestMethod -Uri "$RawBase/$rawPath"
+}
+
 function Add-SmoothBrainHook($path) {
     $data = if (Test-Path $path) {
         try { Get-Content $path -Raw | ConvertFrom-Json }
-        catch { [PSCustomObject]@{} }
+        catch {
+            throw "[smooth-brain] invalid JSON in $path. Fix the file before installing so existing settings are not overwritten."
+        }
     } else {
         [PSCustomObject]@{}
     }
@@ -53,6 +79,7 @@ function Add-SmoothBrainHook($path) {
 
     $tmp = $path + ".tmp"
     try {
+        if (Test-Path $path) { Copy-Item $path ($path + ".smooth-brain.bak") -Force }
         $data | ConvertTo-Json -Depth 10 | Set-Content $tmp -Encoding UTF8
         Move-Item $tmp $path -Force
     } catch {
@@ -67,7 +94,11 @@ function Remove-SmoothBrainHook($path) {
         Log "no settings file found, nothing to remove"
         return
     }
-    $data = try { Get-Content $path -Raw | ConvertFrom-Json } catch { return }
+    $data = try {
+        Get-Content $path -Raw | ConvertFrom-Json
+    } catch {
+        throw "[smooth-brain] invalid JSON in $path. Fix the file before uninstalling so existing settings are not overwritten."
+    }
 
     if (-not $data.PSObject.Properties['hooks'] -or -not $data.hooks.PSObject.Properties['UserPromptSubmit']) {
         return
@@ -87,6 +118,7 @@ function Remove-SmoothBrainHook($path) {
 
     $tmp = $path + ".tmp"
     try {
+        if (Test-Path $path) { Copy-Item $path ($path + ".smooth-brain.bak") -Force }
         $data | ConvertTo-Json -Depth 10 | Set-Content $tmp -Encoding UTF8
         Move-Item $tmp $path -Force
     } catch {
@@ -110,14 +142,11 @@ if (-not (Test-Path $ClaudeDir)) {
     Remove-SmoothBrainHook $SettingsFile
     Ok "Claude Code uninstalled"
 } else {
-    if (-not (Test-Path $CmdSrc)) { Warn "Missing required file: $CmdSrc"; exit 1 }
-    if (-not (Test-Path $SkillSrc)) { Warn "Missing required file: $SkillSrc"; exit 1 }
-
     New-Item -ItemType Directory -Force $CommandsDir | Out-Null
-    Copy-Item $CmdSrc (Join-Path $CommandsDir "smooth-brain.md") -Force
+    Copy-PluginFile $CmdSrc ".claude/commands/smooth-brain.md" (Join-Path $CommandsDir "smooth-brain.md")
     Ok "Slash command -> $CommandsDir\smooth-brain.md"
 
-    $skillContent = (Get-Content $SkillSrc -Raw) -replace "`r`n", "`n"
+    $skillContent = (Get-PluginContent $SkillSrc "skills/smooth-brain/SKILL.md") -replace "`r`n", "`n"
     ($skillContent.TrimEnd() + "`n`nActive preset: bumpy`n") | Set-Content $ActiveFile -Encoding UTF8 -NoNewline
     Ok "Default preset (bumpy) -> $ActiveFile"
 

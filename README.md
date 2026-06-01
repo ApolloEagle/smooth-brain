@@ -16,6 +16,16 @@ irm https://raw.githubusercontent.com/ApolloEagle/smooth-brain/main/install.ps1 
 
 Re-run to update. Safe to run multiple times.
 
+<!-- release-readme:start -->
+## Updates
+
+Current stable version: `v0.2.0`.
+
+- Release updates are proposed by the release-plan workflow after pushes to `main`.
+- Tags are created only after the release PR is merged and tests pass.
+- Re-run the installer to update an existing install.
+<!-- release-readme:end -->
+
 ## Uninstall
 
 ```bash
@@ -44,6 +54,20 @@ All presets automatically suspend for destructive operation warnings (deleting f
 ## How it works
 
 The `/smooth-brain` slash command carries the full preset rules and writes the active preset to `~/.claude/smooth-brain-active`. A session-start hook reads that file so the chosen preset stays active across prompts.
+
+## Release automation
+
+Pushes to `main` run installer tests and create or update a `release/next` PR when releasable changes are detected. The planner uses conventional commits first:
+
+| Commit type | Bump |
+|-------------|------|
+| `feat:` | minor |
+| `fix:`, `perf:`, `refactor:`, `docs:` | patch |
+| `BREAKING CHANGE:` or `type!:` | major |
+
+If `OPENAI_API_KEY` and `OPENAI_MODEL` are set, the planner asks OpenAI for a structured release plan and README/changelog wording. Without both values, the deterministic plan is used.
+
+After the release PR is merged, the release workflow reads `VERSION`, extracts the matching `CHANGELOG.md` entry, creates the `vX.Y.Z` tag, and publishes a GitHub Release.
 
 ## Platforms
 
